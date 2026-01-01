@@ -7,6 +7,7 @@ window.onload = function () {
     let isCountingDown = false;
 
     // DOM Elements - Display
+    const mainTitle = document.querySelector("h1"); // NEW: Targets the h1 header
     const appendMinutes = document.getElementById("minutes");
     const appendSeconds = document.getElementById("seconds");
     const appendTens = document.getElementById("tens");
@@ -27,35 +28,32 @@ window.onload = function () {
     const inputSec = document.getElementById("input-sec");
 
     // --- 1. MODAL CONTROLS ---
-
-    // Show Modal
     btnSet.onclick = function() {
         modal.style.display = "flex";
-        inputMin.focus(); // Auto-focus the first input
+        inputMin.focus();
     };
 
-    // Close Modal (Cancel)
     btnClose.onclick = function() {
         modal.style.display = "none";
     };
 
-    // Save Time and Close
     btnSave.onclick = function() {
         minutes = parseInt(inputMin.value) || 0;
         seconds = parseInt(inputSec.value) || 0;
         tens = 0;
 
-        // Validation: Prevent negative or overly large numbers
         if (minutes < 0) minutes = 0;
         if (seconds < 0) seconds = 0;
         if (seconds > 59) seconds = 59;
 
+        // Determine mode immediately on save
+        isCountingDown = (minutes > 0 || seconds > 0);
+        
         updateDisplay();
         clearStatus();
         modal.style.display = "none";
     };
 
-    // Close modal if user clicks the dark background
     window.onclick = function(event) {
         if (event.target == modal) {
             modal.style.display = "none";
@@ -68,9 +66,11 @@ window.onload = function () {
         clearInterval(Interval);
         clearStatus();
 
-        // Mode Detection: If values are > 0, count down. Otherwise, count up.
+        // Mode Detection
         isCountingDown = (minutes > 0 || seconds > 0 || tens > 0);
         
+        // Update title as soon as we start
+        updateDisplay(); 
         Interval = setInterval(operateTimer, 10);
     };
 
@@ -83,6 +83,7 @@ window.onload = function () {
         minutes = 0;
         seconds = 0;
         tens = 0;
+        isCountingDown = false; // Reset to Stopwatch mode
         updateDisplay();
         clearStatus();
     };
@@ -130,11 +131,18 @@ window.onload = function () {
         appendTens.innerHTML = tens < 10 ? "0" + tens : tens;
         appendSeconds.innerHTML = seconds < 10 ? "0" + seconds : seconds;
         appendMinutes.innerHTML = minutes < 10 ? "0" + minutes : minutes;
+
+        // NEW: Update Header Text based on mode
+        if (isCountingDown) {
+            mainTitle.innerText = "Timer";
+        } else {
+            mainTitle.innerText = "StopWatch";
+        }
     }
 
     function clearStatus() {
         messageArea.innerHTML = "";
         alarm.pause();
-        alarm.currentTime = 0; // Rewind sound to start
+        alarm.currentTime = 0;
     }
 };
